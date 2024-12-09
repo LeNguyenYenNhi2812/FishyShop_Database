@@ -9,12 +9,12 @@ import { login } from "../action/userAction";
 import FormContainer from "../components/form";
 
 const LoginScreen = () => {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [queryParameters] = useSearchParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    // const [role, setRole] = useState("");
     const userLogin = useSelector((state) => state.userLogin);
     const { error, loading, userInfo } = userLogin;
 
@@ -30,7 +30,7 @@ const LoginScreen = () => {
 
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(login(email, password));
+        dispatch(login(username, password));
     };
 
     return (
@@ -47,13 +47,13 @@ const LoginScreen = () => {
                     className="d-flex flex-column"
                     style={{ textAlign: "left" }}
                 >
-                    <Form.Label>Email Adress</Form.Label>
+                    <Form.Label>Username</Form.Label>
                     <Form.Control
-                        type="email"
-                        placeholder="Enter email"
-                        value={email}
+                        type="username"
+                        placeholder="Enter username"
+                        value={username}
                         onChange={(e) => {
-                            setEmail(e.target.value);
+                            setUsername(e.target.value);
                         }}
                     ></Form.Control>
                 </Form.Group>
@@ -73,6 +73,40 @@ const LoginScreen = () => {
                         }}
                     ></Form.Control>
                 </Form.Group>
+                {/* <Form.Group
+                    controlId="role"
+                    className="d-flex flex-column mt-3"
+                    style={{ textAlign: "left" }}>
+                        <Form.Label>Type of Customer</Form.Label>
+                    <div>
+                    <Form.Check
+                        type="radio"
+                        label="Seller"
+                        name="role"
+                        id="roleSeller"
+                        value="Seller"
+                        required
+                        onChange={(e) => setRole(e.target.value)}
+                        checked={role === "Seller"}
+                    />
+                    <Form.Check
+                        type="radio"
+                        label="Purchaser"
+                        name="role"
+                        id="rolePurchaser"
+                        value="Purchaser"
+                        required
+                        onChange={(e) => setRole(e.target.value)}
+                        checked={role === "Purchaser"}
+                    />
+                    </div>
+ 
+                    </Form.Group> */}
+
+
+
+
+
                 <Button
                     type="submit"
                     variant="dark"

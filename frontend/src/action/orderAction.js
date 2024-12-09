@@ -32,13 +32,13 @@ export const createOrder = (order) => async (dispatch, getState) => {
             userLogin: { userInfo },
         } = getState();
 
-        const config = {
-            headers: {
-                "Content-type": "application/json",
-                Authorization: `Bearer ${userInfo.token}`,
-            },
-        };
-        const { data } = await axios.post(`/api/orders/add/`, order, config);
+        // const config = {
+        //     headers: {
+        //         "Content-type": "application/json",
+        //         Authorization: `Bearer ${userInfo.token}`,
+        //     },
+        // };
+        const { data } = await axios.post(`/api/orders/add/`, order);
 
         dispatch({
             type: ORDER_CREATE_SUCCESS,
@@ -50,7 +50,7 @@ export const createOrder = (order) => async (dispatch, getState) => {
             payload: data,
         });
 
-        localStorage.removeItem("cartItems");
+        // localStorage.removeItem("cartItems");
 
         // dispatch({
         //     type: USER_LOGIN_SUCCESS,
@@ -79,13 +79,13 @@ export const getOrderDetail = (id) => async (dispatch, getState) => {
             userLogin: { userInfo },
         } = getState();
 
-        const config = {
-            headers: {
-                "Content-type": "application/json",
-                Authorization: `Bearer ${userInfo.token}`,
-            },
-        };
-        const { data } = await axios.get(`/api/orders/${id}/`, config);
+        // const config = {
+        //     headers: {
+        //         "Content-type": "application/json",
+        //         Authorization: `Bearer ${userInfo.token}`,
+        //     },
+        // };
+        const { data } = await axios.get(`/api/orders/${id}/`);
 
         dispatch({
             type: ORDER_DETAILS_SUCCESS,

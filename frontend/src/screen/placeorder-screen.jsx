@@ -17,6 +17,7 @@ import CheckoutSteps from "../components/checkout";
 import { savePaymentMethod } from "../action/cartAction";
 import { createOrder } from "../action/orderAction";
 import { ORDER_CREATE_RESET } from "../constants/orderConstants";
+import { userDetailsReducers } from './../reducers/userReducer';
 
 const PlaceOrderScreen = () => {
     const cart = useSelector((state) => state.cart);
@@ -26,10 +27,10 @@ const PlaceOrderScreen = () => {
     //const { shippingAddress } = cart;
 
     const navigate = useNavigate();
-
+    const userID=localStorage.getItem("userInfo");
     //add itemsPrice attribute to cart redux
     cart.itemsPrice = cart.cartItems
-        .reduce((acc, item) => acc + item.price * item.quantity, 0)
+        .reduce((acc, item) => acc + item.Price * item.quantity, 0)
         .toFixed(2);
     cart.shippingPrice = (
         cart.itemsPrice > 5000
@@ -42,11 +43,11 @@ const PlaceOrderScreen = () => {
             ? 20
             : 30
     ).toFixed(2);
-    cart.taxPrice = Number(0.082 * cart.itemsPrice).toFixed(2);
+    // cart.taxPrice = Number(0.082 * cart.itemsPrice).toFixed(2);
     cart.totalPrice = (
         Number(cart.itemsPrice) +
-        Number(cart.shippingPrice) +
-        Number(cart.taxPrice)
+        Number(cart.shippingPrice) 
+        // Number(cart.taxPrice)
     ).toFixed(2);
 
     useEffect(() => {
@@ -55,17 +56,21 @@ const PlaceOrderScreen = () => {
             dispatch({type: ORDER_CREATE_RESET })
         }
     }, [success, order, navigate,dispatch]);
-
+    
     const placeOrder = () => {
         dispatch(
             createOrder({
-                orderItems: cart.cartItems,
-                shippingAddress: cart.shippingAddress,
-                paymentMethod: cart.paymentMethod,
-                itemsPrice: cart.itemsPrice,
-                shippingPrice: cart.shippingPrice,
-                taxPrice: cart.taxPrice,
-                totalPrice: cart.totalPrice,
+                item_id: (cart.Product_id*cart.ShopID % 150 ),
+                // shippingAddress: cart.shippingAddress,
+                product_id: cart.Product_id,
+                shop_id: cart.ShopID,
+                quantity: cart.quantity,
+                shipping_fee: cart.shippingPrice,
+                user_id: userID.user_id,
+                payment_type: cart.paymentMethod,
+                
+                
+                
             })
         );
     };
@@ -118,11 +123,12 @@ const PlaceOrderScreen = () => {
                                                 <ListGroup.Item key={index}>
                                                     <Row>
                                                         <Col md={1}>
-                                                            <Image
+                                                            {/* <Image
                                                                 src={item.image}
                                                                 fluid
                                                                 rounded
-                                                            />
+                                                            /> */} 
+                                                            {/* img??? */}
                                                         </Col>
                                                         <Col>
                                                             <Link
