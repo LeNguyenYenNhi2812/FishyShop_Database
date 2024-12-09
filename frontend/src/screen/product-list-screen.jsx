@@ -57,7 +57,7 @@ const ProductListScreen = () => {
     useEffect(() => {
         dispatch({ type: PRODUCT_CREATE_RESET });
 
-        if (!userInfo.isAdmin) {
+        if (userInfo.type_of_customer !== "Seller") {
             navigate("/login");
         }
         if (successCreate) {

@@ -6,16 +6,17 @@ import {
     CART_SAVE_PAYMENT_METHOD,
 } from "../constants/cartConstant";
 
-export const addToCart = (id, quantity) => async (dispatch, getState) => {
-    const { data } = await axios.get(`/api/products/${id}`);
+export const addToCart = (item_id, quantity) => async (dispatch, getState) => {
+    const { data } = await axios.get('http://127.0.0.1:8080/purchaser/api/orders');
     dispatch({
         type: CART_ADD_ITEM,
         payload: {
+            item_id,
             product: data.ProductID,
             shopID: data.ShopID,
-            name: data.ProductName,
+            // name: data.ProductName,
             // image: data.image,
-            price: data.Price,
+            // price: data.Price,
             countInStock: data.inventory,
             quantity,
         },
@@ -27,10 +28,10 @@ export const addToCart = (id, quantity) => async (dispatch, getState) => {
     );
 };
 
-export const removeFromCart = (id) => (dispatch, getState) => {
+export const removeFromCart = (OrderID) => (dispatch, getState) => {
     dispatch({
         type: CART_REMOVE_ITEM,
-        payload: id,
+        payload: OrderID,
     });
     localStorage.setItem(
         "cartItems",
