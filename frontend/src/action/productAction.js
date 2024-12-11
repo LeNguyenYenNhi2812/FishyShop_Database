@@ -116,24 +116,13 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
     }
 };
 
-export const createProduct = () => async (dispatch, getState) => {
+export const createProduct = (productData) => async (dispatch) => {
     try {
-        dispatch({
-            type: PRODUCT_CREATE_REQUEST,
-        });
-
-        const {
-            userLogin: { userInfo },
-        } = getState();
-
-        // const config = {
-        //     headers: {
-        //         "Content-type": "application/json",
-        //         Authorization: `Bearer ${userInfo.token}`,
-        //     },
-        // };
-        const { data } = await axios.post(`/api/products/create/`, {});
-
+        dispatch({ type: PRODUCT_CREATE_REQUEST });
+        console.log("hii", productData)
+        // Replace this with your actual backend URL
+        const { data } = await axios.post("http://127.0.0.1:8080/seller/api/product", productData);
+        console.log("helooo",data);
         dispatch({
             type: PRODUCT_CREATE_SUCCESS,
             payload: data,
@@ -141,10 +130,9 @@ export const createProduct = () => async (dispatch, getState) => {
     } catch (error) {
         dispatch({
             type: PRODUCT_CREATE_FAIL,
-            payload:
-                error.response && error.response.data.detail
-                    ? error.response.data.detail
-                    : error.message,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message,
         });
     }
 };
@@ -233,6 +221,7 @@ export const listTopRatedProducts = (shopID) => async (dispatch) => {
     try {
         dispatch({ type: PRODUCT_TOP_REQUEST });
         const { data } = await axios.get(`http://127.0.0.1:8080/seller/api/products/${shopID}`);
+        console.log(data);
         dispatch({ type: PRODUCT_TOP_SUCCESS, payload: data });
     } catch (error) {
         dispatch({

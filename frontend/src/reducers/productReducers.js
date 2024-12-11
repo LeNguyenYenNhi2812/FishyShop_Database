@@ -116,12 +116,27 @@ export const productReviewCreateReducers = (state = {}, action) => {
     }
 };
 
+// export const productTopRatedReducers = (state = { products: [] }, action) => {
+//     switch (action.type) {
+//         case PRODUCT_TOP_REQUEST:
+//             return { loading: true, products: [] };
+//         case PRODUCT_TOP_SUCCESS:
+//             return { loading: false, products: action.payload };
+//         case PRODUCT_TOP_FAIL:
+//             return { loading: false, error: action.payload };
+//         default:
+//             return state;
+//     }
+// };
 export const productTopRatedReducers = (state = { products: [] }, action) => {
+    console.log("Reducer Action:", action.type, action.payload);
     switch (action.type) {
         case PRODUCT_TOP_REQUEST:
             return { loading: true, products: [] };
         case PRODUCT_TOP_SUCCESS:
-            return { loading: false, products: action.payload };
+            const productsArray = Array.isArray(action.payload) ? action.payload : [action.payload];
+            console.log("Updating Products State:", productsArray);
+            return { loading: false, products: productsArray };
         case PRODUCT_TOP_FAIL:
             return { loading: false, error: action.payload };
         default:

@@ -22,6 +22,7 @@ import UserEditScreen from "./screen/user-edit-screen";
 import ProductListScreen from "./screen/product-list-screen";
 import ProductEditScreen from "./screen/product-edit-screen";
 import OrderListScreen from "./screen/order-list-screen";
+import CreateProductScreen from "./screen/createProductScreen";
 
 const App = () => {
 	useEffect(() => {
@@ -62,7 +63,7 @@ const App = () => {
 							path="/placeholder"
 							element={<PlaceOrderScreen />}
 						/>
-						<Route path="/order/:id" element={<OrderScreen />} />
+						{/* <Route path="/order/:id" element={<OrderScreen />} /> */}
 
 						{/* <Route
 							path="/admin/userlist"
@@ -79,6 +80,10 @@ const App = () => {
 						<Route
 							path="/seller/product/:id/edit"
 							element={<ProductEditScreen />}
+						/>
+						<Route
+							path="/seller/product/create"
+							element={<CreateProductScreen/>}
 						/>
 						<Route
 							path="/seller/orderlist"

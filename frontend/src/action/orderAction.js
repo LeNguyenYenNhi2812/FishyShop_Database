@@ -380,6 +380,38 @@ export const listOrders = (id) => async (dispatch) => {
         });
     }
 };
+
+
+
+
+// src/action/orderAction.js
+// import axios from "axios";
+
+export const listOrderSeller = (SellerID) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: "ORDER_LIST_REQUEST" });
+
+    // const { userLogin: { userInfo } } = getState();
+    // const config = {
+    //   headers: {
+    //     Authorization: `Bearer ${userInfo.token}`,
+    //   },
+    // };
+
+    const { data } = await axios.get(`http://127.0.0.1:8080/seller/api/orders/${SellerID}`,);
+
+    dispatch({
+      type: "ORDER_LIST_SUCCESS",
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: "ORDER_LIST_FAIL",
+      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+    });
+  }
+};
+
 // Remove Order
 export const removeOrder = (orderId) => async (dispatch) => {
     try {
