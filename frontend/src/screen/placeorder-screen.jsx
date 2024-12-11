@@ -1,34 +1,37 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
     Form,
     Button,
     Row,
     Col,
     ListGroup,
-    Image,
     Card,
 } from "react-bootstrap";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CheckoutSteps from "../components/checkout";
-import { savePaymentMethod } from "../action/cartAction";
-import { createOrder } from "../action/orderAction";
+import { listOrders, removeOrder } from "../action/orderAction";
 import { ORDER_CREATE_RESET } from "../constants/orderConstants";
-import { userDetailsReducers } from './../reducers/userReducer';
 
 const PlaceOrderScreen = () => {
     const cart = useSelector((state) => state.cart);
     const orderCreate = useSelector((state) => state.orderCreate);
     const { order, error, success } = orderCreate;
     const dispatch = useDispatch();
-    //const { shippingAddress } = cart;
-
+    const orderList = useSelector((state) => state.orderList);
+    const { loading1, error1, orders } = orderList;
     const navigate = useNavigate();
-    const userID=localStorage.getItem("userInfo");
-    //add itemsPrice attribute to cart redux
+    const { id } = useParams();
+    const userID = localStorage.getItem("userInfo");
+    useEffect(() => {
+        
+        dispatch(listOrders(1)); 
+        // Fetch product details
+    }, [dispatch, id]);
+    // Add itemsPrice attribute to cart redux
     cart.itemsPrice = cart.cartItems
         .reduce((acc, item) => acc + item.Price * item.quantity, 0)
         .toFixed(2);
@@ -43,36 +46,48 @@ const PlaceOrderScreen = () => {
             ? 20
             : 30
     ).toFixed(2);
-    // cart.taxPrice = Number(0.082 * cart.itemsPrice).toFixed(2);
     cart.totalPrice = (
         Number(cart.itemsPrice) +
-        Number(cart.shippingPrice) 
-        // Number(cart.taxPrice)
+        Number(cart.shippingPrice)
     ).toFixed(2);
+
+    // Set up the selected order ID and fetch the selected order
+    const [selectedOrderID, setSelectedOrderID] = useState("");
+
+    // Get the selected order directly based on selectedOrderID
+    const selectedOrder = orders.find((order) => order.order_id == selectedOrderID);
+
+    const [filteredOrders, setFilteredOrders] = useState(orders);
 
     useEffect(() => {
         if (success) {
             navigate(`/order/${order._id}/`);
-            dispatch({type: ORDER_CREATE_RESET })
+            dispatch({ type: ORDER_CREATE_RESET });
         }
-    }, [success, order, navigate,dispatch]);
-    
+    }, [success, order, navigate, dispatch]);
+
+    useEffect(() => {
+        // Automatically updates filteredOrders when orders change
+        setFilteredOrders(orders);
+    }, [orders]);
+
+    const handleSetOrderID = (e) => {
+        setSelectedOrderID(e.target.value);
+    };
+
+    // Function to handle order deletion
+    const handleDeleteOrder = (orderId) => {
+        // Dispatch removeOrder action
+        dispatch(removeOrder(orderId));
+        setSelectedOrderID("");
+        alert(`Order with ID ${orderId} has been deleted!`);
+        window.location.reload();
+    };
+
     const placeOrder = () => {
-        dispatch(
-            createOrder({
-                item_id: (cart.Product_id*cart.ShopID % 150 ),
-                // shippingAddress: cart.shippingAddress,
-                product_id: cart.Product_id,
-                shop_id: cart.ShopID,
-                quantity: cart.quantity,
-                shipping_fee: cart.shippingPrice,
-                user_id: userID.user_id,
-                payment_type: cart.paymentMethod,
-                
-                
-                
-            })
-        );
+        // Place the order logic
+        alert("Order Placed");
+        // Possibly dispatch an action here to place the order
     };
 
     return (
@@ -85,78 +100,68 @@ const PlaceOrderScreen = () => {
                             className="d-flex flex-column mt-1"
                             style={{ textAlign: "left" }}
                         >
-                            <h2>Shipping</h2>
-                            <p>
-                                <span>Shipping : </span>
-                                {cart.shippingAddress.address} &nbsp;&nbsp;
-                                {cart.shippingAddress.city} &nbsp;&nbsp;
-                                {cart.shippingAddress.postalCode}&nbsp;&nbsp;
-                                {cart.shippingAddress.country}
-                            </p>
+                            <h2>Select Order</h2>
+                            <Form.Control
+                                as="select"
+                                value={selectedOrderID}
+                                onChange={handleSetOrderID}
+                            >
+                                <option value="">Select an order</option>
+                                {orders.map((order) => (
+                                    <option key={order.order_id} value={order.order_id}>
+                                        Order {order.order_id} - {order.status}
+                                    </option>
+                                ))}
+                            </Form.Control>
                         </ListGroup.Item>
 
-                        <ListGroup.Item
-                            className="d-flex flex-column mt-1"
-                            style={{ textAlign: "left" }}
-                        >
-                            <h2>Payment Method</h2>
-                            <p>
-                                <span>Payment Method : </span>
-                                {cart.paymentMethod}
-                            </p>
-                        </ListGroup.Item>
+                        {selectedOrder ? (
+                            <>
+                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                    <h2>Shipping</h2>
+                                    <p><span>Shipping: </span>{selectedOrder.shipping_fee ?? 'Not Available'}</p>
+                                </ListGroup.Item>
 
-                        <ListGroup.Item
-                            className="d-flex flex-column mt-1"
-                            style={{ textAlign: "left" }}
-                        >
-                            <h2>Order Items</h2>
-                            <div>
-                                {cart.cartItems.length === 0 ? (
-                                    <Message variant="info">
-                                        Your cart is empty
-                                    </Message>
-                                ) : (
-                                    <ListGroup variant="flush">
-                                        {cart.cartItems.map((item, index) => {
-                                            return (
-                                                <ListGroup.Item key={index}>
-                                                    <Row>
-                                                        <Col md={1}>
-                                                            {/* <Image
-                                                                src={item.image}
-                                                                fluid
-                                                                rounded
-                                                            /> */} 
-                                                            {/* img??? */}
-                                                        </Col>
-                                                        <Col>
-                                                            <Link
-                                                                to={`/product/${item.product}`}
-                                                                className="text-decoration-none text-dark"
-                                                            >
-                                                                {item.name}
-                                                            </Link>
-                                                        </Col>
-                                                        <Col md={4}>
-                                                            {item.quantity} x $
-                                                            {item.price} ={" "}
-                                                            {(
-                                                                item.price *
-                                                                item.quantity
-                                                            ).toFixed(2)}{" "}
-                                                            $
-                                                        </Col>
-                                                    </Row>
-                                                </ListGroup.Item>
-                                            );
-                                        })}
-                                    </ListGroup>
-                                )}
-                            </div>
-                        </ListGroup.Item>
+                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                    <h2>Payment Method</h2>
+                                    <p><span>Payment Method: </span>{selectedOrder.payment_type ?? 'Not Available'}</p>
+                                </ListGroup.Item>
+
+                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                    <h2>Order Items</h2>
+                                    <div>
+                                        {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                            <ListGroup variant="flush">
+                                                {selectedOrder.items.map((item, index) => (
+                                                    <ListGroup.Item key={index}>
+                                                        <Row>
+                                                            <Col md={1}>
+                                                                {/* Optionally, you can display item image here */}
+                                                            </Col>
+                                                            <Col>
+                                                                <Link to={`/product/${item.product}`} className="text-decoration-none text-dark">
+                                                                    {item.name}
+                                                                </Link>
+                                                            </Col>
+                                                            <Col md={4}>
+                                                                {item.quantity} x ${item.price} = {(item.price * item.quantity).toFixed(2)}$
+                                                            </Col>
+                                                        </Row>
+                                                    </ListGroup.Item>
+                                                ))}
+                                            </ListGroup>
+                                        ) : (
+                                            <Message variant="info">No items in this order</Message>
+                                        )}
+                                    </div>
+                                </ListGroup.Item>
+                            </>
+                        ) : (
+                            <Message variant="info">Please select an order to view details</Message>
+                        )}
                     </ListGroup>
                 </Col>
+
                 <Col md={4}>
                     <Card>
                         <ListGroup variant="flush">
@@ -166,43 +171,46 @@ const PlaceOrderScreen = () => {
 
                             <ListGroup.Item style={{ textAlign: "left" }}>
                                 <Row>
-                                    <Col>Item </Col>
-                                    <Col>${cart.itemsPrice}</Col>
+                                    <Col>Item</Col>
+                                    <Col>${selectedOrder?.amount || 0}</Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item style={{ textAlign: "left" }}>
                                 <Row>
-                                    <Col>Shipping </Col>
-                                    <Col>${cart.shippingPrice}</Col>
+                                    <Col>Shipping</Col>
+                                    <Col>${selectedOrder?.shipping_fee || 0}</Col> 
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item style={{ textAlign: "left" }}>
                                 <Row>
-                                    <Col>Tax </Col>
-                                    <Col>${cart.taxPrice}</Col>
+                                    <Col>Total</Col>
+                                    <Col>${(selectedOrder?.amount || 0) + (selectedOrder?.shipping_fee || 0)}</Col>
                                 </Row>
                             </ListGroup.Item>
 
-                            <ListGroup.Item style={{ textAlign: "left" }}>
-                                <Row>
-                                    <Col>Total </Col>
-                                    <Col>${cart.totalPrice}</Col>
-                                </Row>
-                            </ListGroup.Item>
-                            <ListGroup.Item>
-                                {error && <Message variant="danger">{error}</Message>}
-                            </ListGroup.Item>
                             <ListGroup.Item>
                                 <Button
                                     variant="dark"
                                     style={{ minWidth: "75%" }}
                                     className="mt-1 mb-1"
-                                    disabled={cart.cartItems === 0}
+                                    // disabled={cart.cartItems.length === 0 || !selectedOrderID}
                                     onClick={placeOrder}
                                 >
                                     Place Order
+                                </Button>
+                            </ListGroup.Item>
+
+                            <ListGroup.Item>
+                                <Button
+                                    variant="danger"
+                                    style={{ minWidth: "75%" }}
+                                    className="mt-1 mb-1"
+                                    onClick={() => handleDeleteOrder(selectedOrderID)}
+                                    disabled={!selectedOrderID}
+                                >
+                                    Delete Order
                                 </Button>
                             </ListGroup.Item>
                         </ListGroup>

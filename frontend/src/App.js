@@ -40,6 +40,7 @@ const App = () => {
 			},
 		});
 	}, []);
+	
 	return (
 		<div className="App">
 			<Header />
@@ -48,7 +49,7 @@ const App = () => {
 					<Routes>
 						<Route path="/" element={<HomeScreen />} />
 						<Route
-							path="/product/:id"
+							path="/get-products/:id"
 							element={<ProductScreen />}
 						/>
 						{/* <Route path="/cart/:id?" element={<CartScreen />} /> */}
@@ -72,15 +73,15 @@ const App = () => {
 							element={<UserEditScreen />}
 						/> */}
 						<Route
-							path="/admin/productlist"
+							path="/seller/productlist"
 							element={<ProductListScreen />}
 						/>
 						<Route
-							path="/admin/product/:id/edit"
+							path="/seller/product/:id/edit"
 							element={<ProductEditScreen />}
 						/>
 						<Route
-							path="/admin/orderlist"
+							path="/seller/orderlist"
 							element={<OrderListScreen />}
 						/>
 					</Routes>

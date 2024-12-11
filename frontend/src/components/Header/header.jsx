@@ -60,10 +60,10 @@ const Header = () => {
                         <div className="search-cart">
                             <SearchBox />
                             <Nav>
-                                <LinkContainer to="/cart">
+                                <LinkContainer to="/placeholder">
                                     <Nav.Link>
                                         {/* <i className="fa-solid fa-cart-shopping">Cart</i> */}
-                                         <p className="button-context">Cart</p>
+                                         <p className="button-context">Order</p>
                                     </Nav.Link>
                                 </LinkContainer>
                                 {userInfo ? (
@@ -88,15 +88,15 @@ const Header = () => {
                                         </Nav.Link>
                                     </LinkContainer>
                                 )}
-                                {userInfo && userInfo.isAdmin && (
-                                    <NavDropdown title={<span className="text-white fw-bold">Admin</span>} id="adminmenu">
-                                        <LinkContainer to="/admin/userlist">
+                                {userInfo && (userInfo.type_of_customer=="Seller") && (
+                                    <NavDropdown title={<span className="text-white fw-bold">Seller</span>} id="adminmenu">
+                                        {/* <LinkContainer to="/admin/userlist">
                                             <NavDropdown.Item>Users</NavDropdown.Item>
-                                        </LinkContainer>
-                                        <LinkContainer to="/admin/productlist">
+                                        </LinkContainer> */}
+                                        <LinkContainer to="/seller/productlist">
                                             <NavDropdown.Item>Products</NavDropdown.Item>
                                         </LinkContainer>
-                                        <LinkContainer to="/admin/orderlist">
+                                        <LinkContainer to="/seller/orderlist">
                                             <NavDropdown.Item>Orders</NavDropdown.Item>
                                         </LinkContainer>
                                     </NavDropdown>

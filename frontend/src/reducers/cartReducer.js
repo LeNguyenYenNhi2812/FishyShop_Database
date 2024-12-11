@@ -3,24 +3,27 @@ import {
     CART_REMOVE_ITEM,
     CART_SAVE_SHIPPING_ADDRESS,
     CART_SAVE_PAYMENT_METHOD,
-    CART_CLEAR_ITEMS
+    CART_CLEAR_ITEMS,
 } from "../constants/cartConstant";
 
 export const cartReducer = (
-    state = { cartItems: [], shippingAddress: {} },
+    state = { cartItems: [], shippingAddress: {}, paymentMethod: null },
     action
 ) => {
     switch (action.type) {
         case CART_ADD_ITEM:
             const item = action.payload;
             const existItem = state.cartItems.find(
-                (x) => x.product === item.product
+                (x) => x.product_id === item.product_id && x.shop_id === item.shop_id
             );
+
             if (existItem) {
                 return {
                     ...state,
                     cartItems: state.cartItems.map((x) =>
-                        x.product === existItem.product ? item : x
+                        x.product_id === existItem.product_id && x.shop_id === existItem.shop_id
+                            ? item
+                            : x
                     ),
                 };
             } else {
@@ -34,7 +37,7 @@ export const cartReducer = (
             return {
                 ...state,
                 cartItems: state.cartItems.filter(
-                    (x) => x.product !== action.payload
+                    (x) => x.product_id !== action.payload.product_id || x.shop_id !== action.payload.shop_id
                 ),
             };
 
@@ -49,11 +52,12 @@ export const cartReducer = (
                 ...state,
                 paymentMethod: action.payload,
             };
+
         case CART_CLEAR_ITEMS:
-            return{
+            return {
                 ...state,
-                cartItems: []
-            }
+                cartItems: [],
+            };
 
         default:
             return state;

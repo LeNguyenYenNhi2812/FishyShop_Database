@@ -16,7 +16,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import CheckoutSteps from "../components/checkout";
 import { savePaymentMethod } from "../action/cartAction";
-import { getOrderDetail, payOrder, deliverOrder } from "../action/orderAction";
+import { getOrderDetail} from "../action/orderAction";
 // import { PayPalButtons } from "react-paypal-js";
 
 import {
@@ -82,16 +82,18 @@ const OrderScreen = () => {
                 setSdkReady(true);
             }
         }
+
+        
     }, [order, id, dispatch, successPay, successDeliver, navigate, userInfo]);
 
     const successPaymentHandler = (paymentResult) => {
-        dispatch(payOrder(id, true));
+        // dispatch(payOrder(id, true));
     };
 
 
 
     const deliverHandler = () => {
-        dispatch(deliverOrder(order));
+        // dispatch(deliverOrder(order));
     };
 
     // const placeOrder = () => {

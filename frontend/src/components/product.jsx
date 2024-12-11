@@ -1,38 +1,46 @@
-import { Card } from "react-bootstrap";
+import { Card, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Rating from "./rating";
 
 const Product = ({ product }) => {
+    function getRandomIntegerExclusive(a, b) {
+        return Math.floor(Math.random() * (b - a)) + a;
+        
+    }
+    // console.log(product.product_id);
     return (
         <Card 
            
             className="product-container mt-3 p-3 rounded"
             style={{ fontFamily: "Shantell Sans" }}
         >
-            <Link to={`/product/${product._id}`}>
-                <Card.Img
-                    style={{aspectRatio: 5 / 4 }}
-                    src={product.image}
-                />
+            
+            <Link to={`/get-products/${product.product_id}`}>
+            <Image
+                                
+                                src={product?.image?.Valid ? product.image.String : "/placeholder.jpg"}
+                                alt={product?.product_name}
+                                fluid
+                            />
             </Link>
             <Card.Body as="div">
                 <Link
-                    to={`/product/${product._id}`}
+                    to={`/get-products/${product.product_id}`}
                     className="text-decoration-none text-dark"
                 >
                     <strong
                         className="d-flex"
                         style={{ textAlign: "left", height: "3rem" }}
                     >
-                        {product.name}
+                        {product.product_name}
                     </strong>
                 </Link>
                 <Card.Text as="div">
                     <div className="my-3">
                         {/* {product.rating} from {product.numReviews} reviews */}
                         <Rating
-                            value={product.rating}
-                            text={`${product.numReviews} reviews`}
+                            value={getRandomIntegerExclusive(3,5)}
+                            text={ getRandomIntegerExclusive(50,100) + `reviews`}
                             color="#dc994b"
                         />
                     </div>

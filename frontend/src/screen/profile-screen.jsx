@@ -9,7 +9,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { getUserDetails, updateUserProfile } from "../action/userAction";
 import FormContainer from "../components/form";
 import { USER_UPDATE_PROFILE_RESET } from "../constants/userConstants";
-import { listMyOrders } from "../action/orderAction";
+// import { listMyOrders } from "../action/orderAction";
 
 const ProfileScreen = () => {
     const capitalizeFirstLetter = (str) => {
@@ -48,7 +48,7 @@ const ProfileScreen = () => {
     //     : "/";
 
     useEffect(() => {
-        dispatch(listMyOrders());
+        // dispatch(listMyOrders());
     },[dispatch])
     useEffect(() => {
         if (!userInfo) {
@@ -57,7 +57,7 @@ const ProfileScreen = () => {
             if (!user || !user.name || success || userInfo._id !== user._id) {
                 dispatch({ type: USER_UPDATE_PROFILE_RESET });
                 dispatch(getUserDetails("profile"));
-                dispatch(listMyOrders());
+                // dispatch(listMyOrders());
             } else {
                 setName(user.name);
                 setEmail(user.email);
@@ -112,6 +112,7 @@ const ProfileScreen = () => {
                     <Form.Group
                         controlId="email"
                         className="d-flex flex-column mt-3"
+                  
                         style={{ textAlign: "left" }}
                     >
                         <Form.Label>Email Adress</Form.Label>
