@@ -127,7 +127,7 @@ const ProductScreen = () => {
                 <Row>
                     <Col md={6}>
                         <Image
-                            src={product?.image?.Valid ? product.image.String : "/placeholder.jpg"}
+                            src={product?.image?.Valid ? product.image.String : "http://surl.li/nauveq"}
                             alt={product?.product_name}
                             fluid
                         />

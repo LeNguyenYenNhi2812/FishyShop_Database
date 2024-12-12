@@ -6,7 +6,7 @@ import Message from "../components/message";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import CheckoutSteps from "../components/checkout";
-import { listOrders, removeOrder } from "../action/orderAction";
+import { listOrders, removeOrder, updateOrder } from "../action/orderAction";
 import { ORDER_CREATE_RESET } from "../constants/orderConstants";
 import axios from "axios";
 
@@ -25,7 +25,8 @@ const PlaceOrderScreen = () => {
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const [errorProfile, setErrorProfile] = useState(null);
-    
+    const [orderItems, setOrderItems] = useState([]); // State to hold order items
+
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     
     // Fetch user profile and orders
@@ -73,15 +74,59 @@ const PlaceOrderScreen = () => {
     const handleDeleteOrder = (orderId) => {
         dispatch(removeOrder(orderId));
         setSelectedOrderID("");
+       
         alert(`Order with ID ${orderId} has been deleted!`);
         window.location.reload();
-
+    };
+    const selectedIndex = parseInt(selectedOrderID, 10);
+    
+    const item = orderItems[selectedIndex]; 
+    let dummy=0;
+    // console.log("item",item);
+    // console.log("orderItems",selectedOrderID);
+    const handleUpdateOrder = async (order_id) => {
+        
+        let item = orderItems[dummy];
+        
+        const updatedOrder = {
+            order_id,
+            item_id: item.item_id,               // Fetch item_id from orderItems
+            product_id: item.product_id,         // Fetch product_id from orderItems
+            shop_id: item.shop_id,               // Fetch shop_id from orderItems
+            quantity: item.quantity,             // Fetch quantity from orderItems
+            shipping_fee: 40,                    // Example static fee, adjust as needed
+            user_id: userId,                     // Fetch user_id from userProfile or other state
+            status: "Paid",                      // Update status to "Paid"
+            payment_type: "Online",
+        };
+        try {
+            await dispatch(updateOrder(order_id, updatedOrder));
+        } catch (error) {
+            console.error("Error updating order:", error);
+        }
     };
 
     const placeOrder = () => {
-        alert("Order Placed");
-        // Add logic to place the order
+        handleUpdateOrder(selectedOrderID);
+        // console.log("orderwá",selectedOrderID);
+        alert("Order had been paid!");
+        // console.log("sdcfghj",orderItems);
+        window.location.reload();
     };
+
+    // Fetch order items based on selected order ID
+    useEffect(() => {
+        if (selectedOrderID) {
+            axios.get(`http://127.0.0.1:8080/purchaser/api/get-orderItem-detail/${selectedOrderID}`)
+                .then((response) => {
+                    // console.log("sdfgasdwef",response.data);
+                    setOrderItems(response.data); // Store order items in state
+                })
+                .catch((error) => {
+                    console.error("Error fetching order items:", error);
+                });
+        }
+    }, [selectedOrderID]);
 
     cart.itemsPrice = cart.cartItems
         .reduce((acc, item) => acc + item.Price * item.quantity, 0)
@@ -131,7 +176,7 @@ const PlaceOrderScreen = () => {
                                     {orders?.map((order) => (
                                         <option key={order.order_id} value={order.order_id}>
                                             Order {order.order_id} - {order.status}
-                                        </option>
+                                        </option> 
                                     ))}
                                 </Form.Control>
                             </ListGroup.Item>
@@ -150,17 +195,17 @@ const PlaceOrderScreen = () => {
 
                                     <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
                                         <h2>Order Items</h2>
-                                        {selectedOrder.items?.length > 0 ? (
+                                        {orderItems.length > 0 ? (
                                             <ListGroup variant="flush">
-                                                {selectedOrder.items.map((item, index) => (
+                                                {orderItems.map((item, index) => (
                                                     <ListGroup.Item key={index}>
                                                         <Row>
                                                             <Col md={1}>
                                                                 {/* Optionally, you can display item image here */}
                                                             </Col>
                                                             <Col>
-                                                                <Link to={`/product/${item.product}`} className="text-decoration-none text-dark">
-                                                                    {item.name}
+                                                                <Link to={`/product/${item.product_id}`} className="text-decoration-none text-dark">
+                                                                    ID của mã sản phẩm: {item.product_id|| "Product name"}
                                                                 </Link>
                                                             </Col>
                                                             <Col md={4}>
