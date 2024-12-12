@@ -42,6 +42,7 @@ export const userLoginReducers = (state = {}, action) => {
     }
 };
 
+
 export const userRegisterReducers = (state = {}, action) => {
     switch (action.type) {
         case USER_REGISTER_REQUEST:

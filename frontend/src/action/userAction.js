@@ -28,37 +28,40 @@ import {
 import axios from "axios";
 import { ORDER_MY_LIST_RESET } from "../constants/orderConstants";
 
-export const login = (username, password) => async (dispatch) => {
+export const login = (username, password, type_of_customer) => async (dispatch) => {
     try {
         dispatch({
             type: USER_LOGIN_REQUEST,
         });
-        const config = {
-            header: {
-                "Content-type": "application/json",
-            },
-        };
+
         const { data } = await axios.post(
-            "/api/users/login/",
+            "http://127.0.0.1:8080/api/login",
             {
                 username: username,
                 password: password,
-            },
-            config
+                type_of_customer: type_of_customer,
+            }
         );
+
+        // Assuming the API response includes the user object with their info
+        const userInfo = {
+            username: data.user, // Adjust based on your API response
+            message: data.message,
+            type_of_customer: type_of_customer, // You might want to validate or remove this if it's redundant
+        };
 
         dispatch({
             type: USER_LOGIN_SUCCESS,
-            payload: data,
+            payload: userInfo,
         });
 
-        //localStorage.setItem("userInfo", JSON.stringify(data));
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
     } catch (error) {
         dispatch({
             type: USER_LOGIN_FAIL,
             payload:
-                error.response && error.response.data.detail
-                    ? error.response.data.detail
+                error.response && error.response.data.message
+                    ? error.response.data.message
                     : error.message,
         });
     }

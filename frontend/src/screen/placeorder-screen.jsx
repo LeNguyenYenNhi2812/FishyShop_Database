@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-    Form,
-    Button,
-    Row,
-    Col,
-    ListGroup,
-    Card,
-} from "react-bootstrap";
+import { Form, Button, Row, Col, ListGroup, Card } from "react-bootstrap";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import CheckoutSteps from "../components/checkout";
 import { listOrders, removeOrder } from "../action/orderAction";
 import { ORDER_CREATE_RESET } from "../constants/orderConstants";
+import axios from "axios";
 
 const PlaceOrderScreen = () => {
     const cart = useSelector((state) => state.cart);
@@ -22,19 +16,77 @@ const PlaceOrderScreen = () => {
     const { order, error, success } = orderCreate;
     const dispatch = useDispatch();
     const orderList = useSelector((state) => state.orderList);
-    const { loading1, error1, orders } = orderList;
+    const { loading: loadingOrders, error: errorOrders, orders } = orderList;
     const navigate = useNavigate();
     const { id } = useParams();
-    const userID = localStorage.getItem("userInfo");
+    
+    const [userId, setUserId] = useState(null);
+    const [selectedOrderID, setSelectedOrderID] = useState("");
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+    const [errorProfile, setErrorProfile] = useState(null);
+    
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    
+    // Fetch user profile and orders
     useEffect(() => {
+        const fetchUserProfileAndOrders = async () => {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8080/api/profile/${userInfo.username}`);
+                setUserId(response.data.user_id);
+                setLoadingProfile(false);
+            } catch (error) {
+                console.error("Failed to fetch user profile:", error);
+                setErrorProfile("Failed to fetch user profile.");
+                setLoadingProfile(false);
+            }
+        };
         
-        dispatch(listOrders(1)); 
-        // Fetch product details
-    }, [dispatch, id]);
-    // Add itemsPrice attribute to cart redux
+        if (userInfo?.username) {
+            fetchUserProfileAndOrders();
+        }
+    }, [userInfo]);
+
+    // Fetch orders when userId is available
+    useEffect(() => {
+        if (userId) {
+            dispatch(listOrders(userId));
+        }
+    }, [dispatch, userId]);
+
+    useEffect(() => {
+        // Automatically updates filteredOrders when orders change
+        setFilteredOrders(orders);
+    }, [orders]);
+
+    useEffect(() => {
+        if (success) {
+            navigate(`/order/${order._id}/`);
+            dispatch({ type: ORDER_CREATE_RESET });
+        }
+    }, [success, order, navigate, dispatch]);
+
+    const handleSetOrderID = (e) => {
+        setSelectedOrderID(e.target.value);
+    };
+
+    const handleDeleteOrder = (orderId) => {
+        dispatch(removeOrder(orderId));
+        setSelectedOrderID("");
+        alert(`Order with ID ${orderId} has been deleted!`);
+        window.location.reload();
+
+    };
+
+    const placeOrder = () => {
+        alert("Order Placed");
+        // Add logic to place the order
+    };
+
     cart.itemsPrice = cart.cartItems
         .reduce((acc, item) => acc + item.Price * item.quantity, 0)
         .toFixed(2);
+
     cart.shippingPrice = (
         cart.itemsPrice > 5000
             ? 0
@@ -46,91 +98,59 @@ const PlaceOrderScreen = () => {
             ? 20
             : 30
     ).toFixed(2);
+
     cart.totalPrice = (
         Number(cart.itemsPrice) +
         Number(cart.shippingPrice)
     ).toFixed(2);
 
-    // Set up the selected order ID and fetch the selected order
-    const [selectedOrderID, setSelectedOrderID] = useState("");
-
-    // Get the selected order directly based on selectedOrderID
-    const selectedOrder = orders.find((order) => order.order_id == selectedOrderID);
-
-    const [filteredOrders, setFilteredOrders] = useState(orders);
-
-    useEffect(() => {
-        if (success) {
-            navigate(`/order/${order._id}/`);
-            dispatch({ type: ORDER_CREATE_RESET });
-        }
-    }, [success, order, navigate, dispatch]);
-
-    useEffect(() => {
-        // Automatically updates filteredOrders when orders change
-        setFilteredOrders(orders);
-    }, [orders]);
-
-    const handleSetOrderID = (e) => {
-        setSelectedOrderID(e.target.value);
-    };
-
-    // Function to handle order deletion
-    const handleDeleteOrder = (orderId) => {
-        // Dispatch removeOrder action
-        dispatch(removeOrder(orderId));
-        setSelectedOrderID("");
-        alert(`Order with ID ${orderId} has been deleted!`);
-        window.location.reload();
-    };
-
-    const placeOrder = () => {
-        // Place the order logic
-        alert("Order Placed");
-        // Possibly dispatch an action here to place the order
-    };
+    // Ensure orders is an array before using .find()
+    const selectedOrder = Array.isArray(orders) 
+        ? orders.find((order) => order?.order_id == selectedOrderID) 
+        : null;
 
     return (
         <div>
             <CheckoutSteps step1 step2 step3 />
             <Row>
                 <Col md={8}>
-                    <ListGroup variant="flush">
-                        <ListGroup.Item
-                            className="d-flex flex-column mt-1"
-                            style={{ textAlign: "left" }}
-                        >
-                            <h2>Select Order</h2>
-                            <Form.Control
-                                as="select"
-                                value={selectedOrderID}
-                                onChange={handleSetOrderID}
-                            >
-                                <option value="">Select an order</option>
-                                {orders.map((order) => (
-                                    <option key={order.order_id} value={order.order_id}>
-                                        Order {order.order_id} - {order.status}
-                                    </option>
-                                ))}
-                            </Form.Control>
-                        </ListGroup.Item>
+                    {loadingProfile ? (
+                        <Loader />
+                    ) : errorProfile ? (
+                        <Message variant="danger">{errorProfile}</Message>
+                    ) : (
+                        <ListGroup variant="flush">
+                            <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                <h2>Select Order</h2>
+                                <Form.Control
+                                    as="select"
+                                    value={selectedOrderID}
+                                    onChange={handleSetOrderID}
+                                >
+                                    <option value="">Select an order</option>
+                                    {orders?.map((order) => (
+                                        <option key={order.order_id} value={order.order_id}>
+                                            Order {order.order_id} - {order.status}
+                                        </option>
+                                    ))}
+                                </Form.Control>
+                            </ListGroup.Item>
 
-                        {selectedOrder ? (
-                            <>
-                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
-                                    <h2>Shipping</h2>
-                                    <p><span>Shipping: </span>{selectedOrder.shipping_fee ?? 'Not Available'}</p>
-                                </ListGroup.Item>
+                            {selectedOrder ? (
+                                <>
+                                    <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                        <h2>Shipping</h2>
+                                        <p><span>Shipping: </span>{selectedOrder.shipping_fee ?? 'Not Available'}</p>
+                                    </ListGroup.Item>
 
-                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
-                                    <h2>Payment Method</h2>
-                                    <p><span>Payment Method: </span>{selectedOrder.payment_type ?? 'Not Available'}</p>
-                                </ListGroup.Item>
+                                    <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                        <h2>Payment Method</h2>
+                                        <p><span>Payment Method: </span>{selectedOrder.payment_type ?? 'Not Available'}</p>
+                                    </ListGroup.Item>
 
-                                <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
-                                    <h2>Order Items</h2>
-                                    <div>
-                                        {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                    <ListGroup.Item className="d-flex flex-column mt-1" style={{ textAlign: "left" }}>
+                                        <h2>Order Items</h2>
+                                        {selectedOrder.items?.length > 0 ? (
                                             <ListGroup variant="flush">
                                                 {selectedOrder.items.map((item, index) => (
                                                     <ListGroup.Item key={index}>
@@ -153,13 +173,13 @@ const PlaceOrderScreen = () => {
                                         ) : (
                                             <Message variant="info">No items in this order</Message>
                                         )}
-                                    </div>
-                                </ListGroup.Item>
-                            </>
-                        ) : (
-                            <Message variant="info">Please select an order to view details</Message>
-                        )}
-                    </ListGroup>
+                                    </ListGroup.Item>
+                                </>
+                            ) : (
+                                <Message variant="info">Please select an order to view details</Message>
+                            )}
+                        </ListGroup>
+                    )}
                 </Col>
 
                 <Col md={4}>
@@ -195,7 +215,6 @@ const PlaceOrderScreen = () => {
                                     variant="dark"
                                     style={{ minWidth: "75%" }}
                                     className="mt-1 mb-1"
-                                    // disabled={cart.cartItems.length === 0 || !selectedOrderID}
                                     onClick={placeOrder}
                                 >
                                     Place Order

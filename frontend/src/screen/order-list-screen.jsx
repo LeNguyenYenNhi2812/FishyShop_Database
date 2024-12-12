@@ -1,27 +1,48 @@
-// src/screens/OrderListScreen.js
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Button } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import { listOrderSeller } from "../action/orderAction"; 
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Make sure axios is imported
 
 const OrderListScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Ensure you're selecting the correct slice of state
+  const [userId, setUserId] = useState(null);  // State to store userId
+
+  // Select state related to orders
   const listOrderSellerState = useSelector((state) => state.listOrderSeller);
   const { loading, error, orders } = listOrderSellerState;
 
+  // Select state related to user login
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  // Fetch userId based on username in userInfo
   useEffect(() => {
-    dispatch(listOrderSeller(1)); // Assuming 1 is the user ID or dynamic ID based on login
-  }, [dispatch, userInfo]);
+    if (userInfo?.username) {
+      const fetchUserProfile = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8080/api/profile/${userInfo.username}`);
+          setUserId(response.data.user_id); // Set userId state
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      };
+
+      fetchUserProfile();
+    }
+  }, [userInfo]);
+
+  // Fetch orders when userId is available
+  useEffect(() => {
+    if (userId) {
+      dispatch(listOrderSeller(userId)); // Dispatch the action to fetch orders for this user
+    }
+  }, [dispatch, userId]);
 
   return (
     <div>
@@ -53,12 +74,14 @@ const OrderListScreen = () => {
                 <td>{order.ShopID}</td>
                 <td>{order.Quantity}</td>
                 <td>
-                  {order.NumberOfStars.Valid
+                  {/* Check if NumberOfStars exists and is valid */}
+                  {order.NumberOfStars && order.NumberOfStars.Valid
                     ? order.NumberOfStars.Int64
                     : "N/A"}
                 </td>
                 <td>
-                  {order.FeedbackContent.Valid
+                  {/* Check if FeedbackContent exists and is valid */}
+                  {order.FeedbackContent && order.FeedbackContent.Valid
                     ? order.FeedbackContent.String
                     : "No feedback"}
                 </td>

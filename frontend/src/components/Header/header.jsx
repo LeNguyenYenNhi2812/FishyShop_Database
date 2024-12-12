@@ -68,7 +68,7 @@ const Header = () => {
                                 </LinkContainer>
                                 {userInfo ? (
                                     <NavDropdown
-                                        title={<span className="text-white fw-bold">{capitalizeFirstLetter(userInfo.name)}</span>}
+                                        title={<span className="text-white fw-bold">{capitalizeFirstLetter(userInfo.username)}</span>}
                                         id="username"
                                     >
                                         <NavDropdown.Item>

@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/loader";
 import Message from "../components/message";
-import { listTopRatedProducts, deleteProduct } from "../action/productAction"; // Ensure deleteProduct is imported
+import { listTopRatedProducts, deleteProduct } from "../action/productAction";
+import axios from "axios";
 
 const ProductListScreen = () => {
     const dispatch = useDispatch();
@@ -14,14 +15,32 @@ const ProductListScreen = () => {
     const { loading = false, error, products = [] } = productTopRated;
 
     const [deleting, setDeleting] = useState(false);
+    const [userId, setUserId] = useState(null);  // State to store userId
+
+    // Get username from localStorage (assuming userInfo contains only username)
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const userID = userInfo?.username;
 
     useEffect(() => {
-        dispatch(listTopRatedProducts(1));
-    }, [dispatch]);
+        if (userID) {
+            const fetchUserProfileAndOrders = async () => {
+                try {
+                    // Fetch user profile using username to get userId
+                    const response = await axios.get(`http://127.0.0.1:8080/api/profile/${userID}`);
+                    const userId = response.data.user_id;
+                    setUserId(userId); // Store userId in state
+                    console.log("userId:", userId);
 
-    useEffect(() => {
-        console.log("Top Products:", products); 
-    }, [products]);
+                    // Dispatch action to fetch user's products based on userId
+                    dispatch(listTopRatedProducts(userId));
+                } catch (error) {
+                    console.error("Failed to fetch user profile:", error);
+                }
+            };
+
+            fetchUserProfileAndOrders();
+        }
+    }, [dispatch, userID]);
 
     const deleteHandler = (productId) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
@@ -39,7 +58,7 @@ const ProductListScreen = () => {
         <div>
             <Row className="align-items-center">
                 <Col>
-                    <h1>Top Products</h1>
+                    <h1>List Product of shop</h1>
                 </Col>
                 <Col className="text-right">
                     <Button variant="primary" onClick={createHandler}>

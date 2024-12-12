@@ -1,230 +1,107 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Form, Button, Row, Col, Table } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
+import { useEffect, useState } from "react";
+import { Container, Row, Col, Card, ListGroup, Button } from "react-bootstrap";
 import Loader from "../components/loader";
 import Message from "../components/message";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { getUserDetails, updateUserProfile } from "../action/userAction";
-import FormContainer from "../components/form";
-import { USER_UPDATE_PROFILE_RESET } from "../constants/userConstants";
-// import { listMyOrders } from "../action/orderAction";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ProfileScreen = () => {
-    const capitalizeFirstLetter = (str) => {
-        const arr = str.split(" ");
-        for (var i = 0; i < arr.length; i++) {
-            arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userType, setUserType] = useState(null); // To store the user type (Seller or not)
+
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+  const navigate = useNavigate();
+
+  const HandleGoback = () => {
+    navigate("/");
+  };
+
+  // Fetch userId and userType based on the username in userInfo
+  useEffect(() => {
+    if (userInfo?.username) {
+      const fetchUserProfile = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8080/api/profile/${userInfo.username}`);
+          setUserId(response.data.user_id); // Set userId state
+          setUserType(response.data.type_of_customer); // Set userType state
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+          setError("Failed to fetch user profile.");
         }
-        const str2 = arr.join(" ");
-        return str2;
-    };
+      };
 
-    const [email, setEmail] = useState("");
-    const [name, setName] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [message, setMessage] = useState("");
+      fetchUserProfile();
+    }
+  }, [userInfo]);
 
-    const [queryParameters] = useSearchParams();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-
-    const userDetails = useSelector((state) => state.userDetails);
-    const { error, loading, user } = userDetails;
-
-    const userLogin = useSelector((state) => state.userLogin);
-    const { userInfo } = userLogin;
-
-    const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
-    const { success } = userUpdateProfile;
-
-    const orderMyList = useSelector((state) => state.orderMyList);
-    const { loading: loadingOrders, error: errorOrders, orders } = orderMyList;
-
-    // const redirect = queryParameters.get("redirect")
-    //     ? queryParameters.get("redirect")
-    //     : "/";
-
-    useEffect(() => {
-        // dispatch(listMyOrders());
-    },[dispatch])
-    useEffect(() => {
-        if (!userInfo) {
-            navigate("/login");
-        } else {
-            if (!user || !user.name || success || userInfo._id !== user._id) {
-                dispatch({ type: USER_UPDATE_PROFILE_RESET });
-                dispatch(getUserDetails("profile"));
-                // dispatch(listMyOrders());
-            } else {
-                setName(user.name);
-                setEmail(user.email);
-            }
+  // Fetch profile data once the userId and userType are available
+  useEffect(() => {
+    if (userId && userType === "Seller") {
+      const fetchProfileData = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8080/seller/api/shop/${userId}`);
+          setProfileData(response.data);
+        } catch (err) {
+          setError("Failed to fetch profile data.");
+        } finally {
+          setLoading(false);
         }
-    }, [userInfo, user, navigate, dispatch, success]);
+      };
 
-    const submitHandler = (e) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            setMessage("Password do not match");
-        } else {
-            dispatch(
-                updateUserProfile({
-                    id: user._id,
-                    name: name,
-                    email: email,
-                    password: password,
-                })
-            );
-            setMessage("");
-        }
-    };
+      fetchProfileData();
+    } else if (userType && userType !== "Seller") {
+      setError("You must be a Seller to view this profile.");
+      setLoading(false);
+    }
+  }, [userId, userType]);
 
-    return (
+  return (
+    <Container>
+      <h1 className="my-4 text-center">Profile Information</h1>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
         <Row>
-            <Col md={4}>
-                <h3>User Profile</h3>
-                {error && <Message variant="danger">{error}</Message>}
-                {loading && <Loader />}
-                {message && <Message variant="danger">{message}</Message>}
-                <Form
-                    className="border border-dark rounded-2 p-4"
-                    onSubmit={submitHandler}
-                >
-                    <Form.Group
-                        controlId="name"
-                        className="d-flex flex-column"
-                        style={{ textAlign: "left" }}
-                    >
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control
-                            required
-                            type="name"
-                            placeholder="Enter name"
-                            value={capitalizeFirstLetter(name)}
-                            onChange={(e) => {
-                                setName(e.target.value);
-                            }}
-                        ></Form.Control>
-                    </Form.Group>
-                    <Form.Group
-                        controlId="email"
-                        className="d-flex flex-column mt-3"
-                  
-                        style={{ textAlign: "left" }}
-                    >
-                        <Form.Label>Email Adress</Form.Label>
-                        <Form.Control
-                            required
-                            type="email"
-                            placeholder="Enter email"
-                            value={email}
-                            onChange={(e) => {
-                                setEmail(e.target.value);
-                            }}
-                        ></Form.Control>
-                    </Form.Group>
-
-                    <Form.Group
-                        controlId="password"
-                        className="d-flex flex-column mt-3"
-                        style={{ textAlign: "left" }}
-                    >
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                            type="password"
-                            placeholder="Enter password"
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                            }}
-                        ></Form.Control>
-                    </Form.Group>
-
-                    <Form.Group
-                        controlId="passwordConfirm"
-                        className="d-flex flex-column mt-3"
-                        style={{ textAlign: "left" }}
-                    >
-                        <Form.Label>Confirm Password</Form.Label>
-                        <Form.Control
-                            type="password"
-                            placeholder="Confirm password"
-                            value={confirmPassword}
-                            onChange={(e) => {
-                                setConfirmPassword(e.target.value);
-                            }}
-                        ></Form.Control>
-                    </Form.Group>
-                    <Button
-                        type="submit"
-                        variant="dark"
-                        className="mt-4"
-                        style={{ minWidth: "50%" }}
-                    >
-                        Update
-                    </Button>
-                </Form>
-            </Col>
-            <Col md={8}>
-                <h2>My Orders</h2>
-                {loadingOrders ? (
-                    <Loader />
-                ) : errorOrders ? (
-                    <Message variant="danger">{errorOrders}</Message>
-                ) : (
-                    <Table striped responsive className="table-sm">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Paid</th>
-                                <th>Delivered</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orders?.map((order, index) => {
-                                return (
-                                    <tr key={order._id}>
-                                        <td>{index + 1}</td>
-                                        <td>
-                                            {order.createAt?.substring(0, 10)}
-                                        </td>
-                                        <td>${order.totalPrice}</td>
-                                        <td>
-                                            {order.isPaid ? (
-                                                order.paidAt?.substring(0, 10)
-                                            ) : (
-                                                <i
-                                                    className="fas fa-times"
-                                                    style={{ color: "red" }}
-                                                ></i>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <LinkContainer
-                                                to={`/order/${order._id}`}
-                                            >
-                                                <Button
-                                                    className="btn btn-sm px-3"
-                                                    variant="info"
-                                                >
-                                                    Details
-                                                </Button>
-                                            </LinkContainer>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </Table>
-                )}
-            </Col>
+          <Col md={8} className="mx-auto">
+            <Card>
+              <Card.Header>
+                <h2>{profileData.shop_name} - Profile</h2>
+              </Card.Header>
+              <ListGroup variant="flush">
+                <ListGroup.Item>
+                  <strong>Shop ID:</strong> {profileData.shop_id}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>User ID:</strong> {profileData.user_id}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Shop Name:</strong> {profileData.shop_name}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Total Sales:</strong> ${profileData.total_sales}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <strong>Creation Date:</strong> {new Date(profileData.creation_date).toLocaleDateString()}
+                </ListGroup.Item>
+              </ListGroup>
+              <Card.Footer>
+                <Button variant="primary" onClick={HandleGoback}>
+                  Go back
+                </Button>
+              </Card.Footer>
+            </Card>
+          </Col>
         </Row>
-    );
+      )}
+    </Container>
+  );
 };
 
 export default ProfileScreen;

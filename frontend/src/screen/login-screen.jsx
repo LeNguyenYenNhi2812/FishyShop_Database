@@ -14,7 +14,7 @@ const LoginScreen = () => {
     const [queryParameters] = useSearchParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    // const [role, setRole] = useState("");
+    const [role, setRole] = useState("");
     const userLogin = useSelector((state) => state.userLogin);
     const { error, loading, userInfo } = userLogin;
 
@@ -22,15 +22,18 @@ const LoginScreen = () => {
         ? queryParameters.get("redirect")
         : "/";
 
-    useEffect(() => {
-        if (userInfo) {
-            navigate(redirect);
-        }
-    }, [userInfo, navigate, redirect]);
+        useEffect(() => {
+            if (userInfo) {
+                alert(userInfo.message); // "Login successful"
+                navigate(redirect);
+            }
+        }, [userInfo, navigate, redirect]);
+        
 
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(login(username, password));
+        
+        dispatch(login(username, password,role));
     };
 
     return (
@@ -73,7 +76,7 @@ const LoginScreen = () => {
                         }}
                     ></Form.Control>
                 </Form.Group>
-                {/* <Form.Group
+                <Form.Group
                     controlId="role"
                     className="d-flex flex-column mt-3"
                     style={{ textAlign: "left" }}>
@@ -87,7 +90,7 @@ const LoginScreen = () => {
                         value="Seller"
                         required
                         onChange={(e) => setRole(e.target.value)}
-                        checked={role === "Seller"}
+                        checked={role == "Seller"}
                     />
                     <Form.Check
                         type="radio"
@@ -97,11 +100,11 @@ const LoginScreen = () => {
                         value="Purchaser"
                         required
                         onChange={(e) => setRole(e.target.value)}
-                        checked={role === "Purchaser"}
+                        checked={role == "Purchaser"}
                     />
                     </div>
  
-                    </Form.Group> */}
+                    </Form.Group>
 
 
 
