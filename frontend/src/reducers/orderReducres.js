@@ -23,6 +23,9 @@ import {
     ORDER_DELIVER_RESET,
     CREATE_NEW_ORDER,
     ORDER_REMOVE_REQUEST,
+    ORDER_UPDATE_REQUEST,
+    ORDER_UPDATE_SUCCESS,
+    ORDER_UPDATE_FAIL
 } from "../constants/orderConstants";
 
 export const orderCreateReducers = (state = {}, action) => {
@@ -186,6 +189,19 @@ export const listOrderSellerReducer = (state = initialState, action) => {
         return state;
     }
   };
+  const orderReducer = (state = { order: {} }, action) => {
+    switch (action.type) {
+        case ORDER_UPDATE_REQUEST:
+            return { ...state, loading: true };
+        case ORDER_UPDATE_SUCCESS:
+            return { loading: false, order: action.payload };
+        case ORDER_UPDATE_FAIL:
+            return { loading: false, error: action.payload };
+        default:
+            return state;
+    }
+};
+
 export const orderDeliverReducer = (state = {}, action) => {
     switch (action.type) {
         case ORDER_DELIVER_REQUEST:

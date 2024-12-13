@@ -16,7 +16,7 @@ const Header = () => {
             arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
         }
         const str2 = arr.join(" ");
-        return str2;
+        return str;
     };
     
     const userLogin = useSelector((state) => state.userLogin);

@@ -337,7 +337,7 @@ const ProductEditScreen = () => {
 
     return (
         <div>
-            <LinkContainer className="mt-3" to="/admin/productlist">
+            <LinkContainer className="mt-3" to="/seller/productlist">
                 <Button variant="outline-secondary">Go Back</Button>
             </LinkContainer>
             <FormContainer>

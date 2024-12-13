@@ -12,7 +12,8 @@ const ProfileScreen = () => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userType, setUserType] = useState(null); // To store the user type (Seller or not)
-
+  const [totalSale, setTotalSale] = useState(null);
+  
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
   const navigate = useNavigate();
@@ -60,6 +61,22 @@ const ProfileScreen = () => {
     }
   }, [userId, userType]);
 
+  // Fetch totalSale only after profileData is available and has shop_id
+  useEffect(() => {
+    if (profileData && profileData.shop_id) {
+      const fetchTotalSale = async () => {
+        try {
+          const response = await axios.get(`http://127.0.0.1:8080/seller/api/finance/${profileData.shop_id}`);
+          setTotalSale(response.data);
+        } catch (err) {
+          setError("Failed to fetch totalSale data.");
+        }
+      };
+
+      fetchTotalSale();
+    }
+  }, [profileData]); // Dependency on profileData ensures it waits for profileData to load
+
   return (
     <Container>
       <h1 className="my-4 text-center">Profile Information</h1>
@@ -85,7 +102,7 @@ const ProfileScreen = () => {
                   <strong>Shop Name:</strong> {profileData.shop_name}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <strong>Total Sales:</strong> ${profileData.total_sales}
+                  <strong>Total Sales:</strong> ${totalSale ? totalSale.totalSale : "Loading..."}
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <strong>Creation Date:</strong> {new Date(profileData.creation_date).toLocaleDateString()}

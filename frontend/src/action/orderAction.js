@@ -291,7 +291,7 @@ export const createOrder = (order) => async (dispatch) => {
         });
 
         const { data } = await axios.post(`http://127.0.0.1:8080/purchaser/api/orders`, order);
-
+        console.log(data);
         dispatch({
             type: ORDER_CREATE_SUCCESS,
             payload: data,
@@ -337,9 +337,20 @@ export const updateOrder = (id, updatedOrder) => async (dispatch) => {
         dispatch({
             type: ORDER_UPDATE_REQUEST,
         });
-
+        // const ecec ={
+        //     "order_id": 6127,
+        //     "item_id": 37,
+        //     "product_id": 1,
+        //     "shop_id": 1,
+        //     "quantity": 5,
+        //     "shipping_fee": 10,
+        //     "user_id": 1,
+        //     "payment_type": "CreditCard",
+        //     ""
+        // }
+        console.log("Payload being sent to the server:", updatedOrder);
         const { data } = await axios.put(`http://127.0.0.1:8080/purchaser/api/orders/${id}`, updatedOrder);
-        console.log("hellooo");
+        
         dispatch({
             type: ORDER_UPDATE_SUCCESS,
             payload: data,

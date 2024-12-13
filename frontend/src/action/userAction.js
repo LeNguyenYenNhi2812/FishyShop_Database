@@ -88,13 +88,14 @@ export const register = (username, password, email, ssn, type_of_customer,date_o
         dispatch({
             type: USER_REGISTER_REQUEST,
         });
-        const config = {
-            header: {
-                "Content-type": "application/json",
-            },
-        };
+        // const config = {
+        //     header: {
+        //         "Content-type": "application/json",
+        //     },
+        // };
+        console.log(username, password, email, ssn, type_of_customer, date_of_birth, address, phone, FName, LName);
         const { data } = await axios.post(
-            "/api/users/register/",
+            "http://127.0.0.1:8080/api/register",
             {
                 username: username,
                 password: password,
@@ -108,8 +109,9 @@ export const register = (username, password, email, ssn, type_of_customer,date_o
                 LName:LName,
 
             },
-            config
+            // config
         );
+        console.log(data);
 
         dispatch({
             type: USER_REGISTER_SUCCESS,

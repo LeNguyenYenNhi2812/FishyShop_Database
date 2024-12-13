@@ -53,6 +53,8 @@ const ProductScreen = () => {
     // Handlers
     const handleCreateOrder = async () => {
         const newOrder = {
+            order_id: getRandomInteger(1000, 9999),
+        
             item_id: getRandomInteger(100, 1000),
             product_id: product?.product_id,
             shop_id: product?.shop_id,
@@ -70,17 +72,19 @@ const ProductScreen = () => {
     };
 
     const handleUpdateOrder = async (order_id) => {
+        console.log("Updating order:", order_id);
         const updatedOrder = {
-            order_id,
+            
             item_id: getRandomInteger(1000, 2000),
             product_id: product?.product_id,
             shop_id: product?.shop_id,
             quantity,
             shipping_fee: 40,
             user_id: userId,
-            status: "Processing",
+            status: "Paid",
             payment_type: "Online",
         };
+        console.log("Updated Order:1234e5rt6", updatedOrder);
         try {
             await dispatch(updateOrder(order_id, updatedOrder));
         } catch (error) {
@@ -90,7 +94,7 @@ const ProductScreen = () => {
 
     const addToCartHandler = async () => {
         let finalOrderID = selectedOrderID;
-
+        console.log("Selected Order ID:", selectedOrderID);
         if (!selectedOrderID) {
             try {
                 finalOrderID = await handleCreateOrder();

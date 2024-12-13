@@ -117,7 +117,7 @@ const OrderScreen = () => {
     ) : (
         <div>
             {userInfo.isAdmin ? (
-                <LinkContainer className="mt-3" to="/admin/orderlist">
+                <LinkContainer className="mt-3" to="/seller/orderlist">
                     <Button variant="outline-dark">Go back</Button>
                 </LinkContainer>
             ) : (

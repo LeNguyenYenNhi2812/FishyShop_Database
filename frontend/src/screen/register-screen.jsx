@@ -45,6 +45,7 @@ const RegisterScreen = () => {
             setMessage("Password do not match");
         }
         dispatch(register(username, password, email, ssn, type_of_customer,date_of_birth,address,phone,FName,LName));
+        navigate("/login");
     };
 
     return (
@@ -151,7 +152,7 @@ const RegisterScreen = () => {
                     <Form.Control
                         required
                         type="Date of birth"
-                        placeholder="Date of birth"
+                        placeholder="yyyy-mm-dd"
                         value={date_of_birth}
                         onChange={(e) => {
                             setDate_of_birth(e.target.value);
@@ -241,21 +242,19 @@ const RegisterScreen = () => {
                         type="radio"
                         label="Seller"
                         name="typeCustomer"
-                        id="typeCustomer"
-                        value={type_of_customer}
-                        required
+                        id="typeCustomerSeller"
+                        value="Seller" // Gán giá trị cụ thể
                         onChange={(e) => setType_of_customer(e.target.value)}
-                        // checked={role === "Seller"}
+                        checked={type_of_customer === "Seller"}
                     />
                     <Form.Check
                         type="radio"
                         label="Purchaser"
                         name="typeCustomer"
-                        id="typeCustomer"
-                        value={type_of_customer}
-                        required
+                        id="typeCustomerPurchaser"
+                        value="Purchaser" // Gán giá trị cụ thể
                         onChange={(e) => setType_of_customer(e.target.value)}
-                        // checked={role === "Purchaser"}
+                        checked={type_of_customer === "Purchaser"}
                     />
                     </div>
 

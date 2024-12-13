@@ -18,7 +18,7 @@ const Product = ({ product }) => {
             <Link to={`/get-products/${product.product_id}`}>
             <Image
                                 
-                                src={product?.image?.Valid ? product.image.String : "/placeholder.jpg"}
+                                src={product?.image?.Valid ? product.image.String : "http://surl.li/nauveq"}
                                 alt={product?.product_name}
                                 fluid
                             />
@@ -38,11 +38,11 @@ const Product = ({ product }) => {
                 <Card.Text as="div">
                     <div className="my-3">
                         {/* {product.rating} from {product.numReviews} reviews */}
-                        <Rating
+                        {/* <Rating
                             value={getRandomIntegerExclusive(3,5)}
                             text={ getRandomIntegerExclusive(50,100) + `reviews`}
                             color="#dc994b"
-                        />
+                        /> */}
                     </div>
                 </Card.Text>
                 <Card.Text as="h3">${product.price}</Card.Text>
